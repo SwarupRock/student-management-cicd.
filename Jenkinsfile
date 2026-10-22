@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        // Prepend Python to PATH for Jenkins Windows Service (runs as LocalSystem)
+        PATH = "C:\\Users\\Swarup D\\AppData\\Local\\Programs\\Python\\Python312;C:\\Users\\Swarup D\\AppData\\Local\\Programs\\Python\\Python312\\Scripts;${env.PATH}"
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -12,8 +17,8 @@ pipeline {
             steps {
                 bat '''
                     python -m venv .venv
-                    .venv\\Scripts\\python.exe -m pip install 
--r requirements.txt
+                    .venv\\Scripts\\python.exe -m pip install --upgrade pip
+                    .venv\\Scripts\\python.exe -m pip install -r requirements.txt
                 '''
             }
         }
@@ -35,13 +40,9 @@ pipeline {
                 bat '''
                     if not exist release mkdir release
                     copy /Y app.py release\\app.py
-                    copy /Y requirements.txt release\
-\requirements.txt
+                    copy /Y requirements.txt release\\requirements.txt
                 '''
-
-
-                archiveArtifacts artifacts: 'release/**',
-                                 fingerprint: true
+                archiveArtifacts artifacts: 'release/**', fingerprint: true
             }
         }
     }
